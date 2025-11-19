@@ -30,6 +30,7 @@ An AI-powered mock interview platform for Software Development Engineer (SDE1) p
 ### Frontend (React + Vite + TypeScript)
 - **Location**: `frontend/`
 - **Port**: 5000 (exposed to internet)
+- **Configuration**: Vite configured with `allowedHosts: true` to work with Replit's proxy system
 - **Key Features**:
   - Modern React with TypeScript
   - Vite for fast development

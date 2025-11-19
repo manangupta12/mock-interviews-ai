@@ -2,7 +2,6 @@ import requests
 import json
 import logging
 import re
-import time
 from typing import List, Dict, Optional
 from app.core.config import settings
 
@@ -445,46 +444,33 @@ rl.on('close', () => {{
             try:
                 logger.info(f"Sending POST request to {self.base_url}/submissions...")
                 
-                # Retry logic for rate limiting
-                max_retries = 3
-                retry_delay = 2  # seconds
+                response = requests.post(
+                    f"{self.base_url}/submissions",
+                    json=payload,
+                    headers=self.headers,
+                    params={"base64_encoded": "false", "wait": "true"},
+                    timeout=30
+                )
                 
-                for attempt in range(max_retries):
-                    response = requests.post(
-                        f"{self.base_url}/submissions",
-                        json=payload,
-                        headers=self.headers,
-                        params={"base64_encoded": "false", "wait": "true"},
-                        timeout=30
-                    )
-                    
-                    logger.info(f"Response status code: {response.status_code} (attempt {attempt + 1}/{max_retries})")
-                    
-                    # If rate limited, wait and retry
-                    if response.status_code == 429:
-                        if attempt < max_retries - 1:
-                            wait_time = retry_delay * (attempt + 1)  # Exponential backoff
-                            logger.warning(f"Rate limited (429). Waiting {wait_time} seconds before retry...")
-                            time.sleep(wait_time)
-                            continue
-                        else:
-                            logger.error("Max retries reached for rate limit. Failing test case.")
-                            results.append({
-                                "test_case": i + 1,
-                                "input": test_case.get("input", ""),
-                                "expected_output": test_case.get("output", ""),
-                                "actual_output": "",
-                                "status": "Rate Limited",
-                                "passed": False,
-                                "error": "Judge0 API rate limit exceeded. Please try again later.",
-                            })
-                            all_passed = False
-                            break
-                    
-                    # If successful, break out of retry loop
-                    response.raise_for_status()
-                    result = response.json()
-                    break  # Success, exit retry loop
+                logger.info(f"Response status code: {response.status_code}")
+                
+                # Check for rate limit error
+                if response.status_code == 429:
+                    logger.error("Rate limited (429). Failing test case.")
+                    results.append({
+                        "test_case": i + 1,
+                        "input": test_case.get("input", ""),
+                        "expected_output": test_case.get("output", ""),
+                        "actual_output": "",
+                        "status": "Rate Limited",
+                        "passed": False,
+                        "error": "Judge0 API rate limit exceeded. Please try again later.",
+                    })
+                    all_passed = False
+                    continue  # Skip to next test case
+                
+                response.raise_for_status()
+                result = response.json()
                 
                 logger.info(f"Response received: {json.dumps(result, indent=2)}")
                 

@@ -40,19 +40,19 @@ INTERVIEW STAGES - YOUR ROLE IN EACH:
    - EXAMPLE QUESTIONS: "What's your approach?", "Which data structure would you use?", "Have you considered edge cases?"
 
 2. CODING STAGE:
-   - YOUR TASK: Let the candidate write code. The code editor is now enabled for them.
-   - ASK FOR: They should implement their solution in code
-   - VERIFY: They are coding their explained approach
+   - YOUR TASK: Let the candidate write code. The code editor is now enabled for them. DO NOT ask questions during this stage.
+   - BEHAVIOR: The candidate is actively coding. Stay silent and wait for them to complete. They will click "Complete Coding" when done.
    - MOVE TO FOLLOWUP WHEN: They indicate they've completed coding (they'll click "Complete Coding")
-   - EXAMPLE QUESTIONS: "Please implement your solution.", "Feel free to start coding now."
+   - CRITICAL: DO NOT send any messages during the coding stage. The candidate needs uninterrupted time to code.
 
-3. FOLLOWUP STAGE:
-   - YOUR TASK: IMMEDIATELY ask a specific question about their code implementation. DO NOT just announce the stage.
-   - CRITICAL: You MUST ask an actual question in your first response. Never say "Let's proceed to follow-up questions" or similar - ASK THE QUESTION DIRECTLY.
-   - ASK FOR: Explanation of code choices, handling of edge cases, why they chose certain approaches, walkthrough of specific code sections
-   - VERIFY: They understand their own code, can explain design decisions
-   - MOVE TO COMPLEXITY WHEN: You've asked 2-3 follow-up questions and they've responded to all of them
-   - EXAMPLE QUESTIONS: "Why did you use this data structure?", "How does your code handle edge case X?", "Can you walk through this part of your code?", "What would happen if the input was empty?", "Why did you choose this algorithm over alternative approaches?"
+    3. FOLLOWUP STAGE:
+       - YOUR TASK: IMMEDIATELY ask a specific question about their code implementation. DO NOT just announce the stage.
+       - CRITICAL: You MUST ask an actual question in your first response. Never say "Let's proceed to follow-up questions" or similar - ASK THE QUESTION DIRECTLY.
+       - ASK FOR: Explanation of code choices, handling of edge cases, why they chose certain approaches, walkthrough of specific code sections
+       - VERIFY: They understand their own code, can explain design decisions
+       - MOVE TO COMPLEXITY WHEN: After asking 2 follow-up questions and getting answers, explicitly mention moving to complexity analysis
+       - WHEN DONE WITH FOLLOWUP: Say something like "Great! Now let's analyze the time and space complexity of your solution. Can you explain both?"
+       - EXAMPLE QUESTIONS: "Why did you use this data structure?", "How does your code handle edge case X?", "Can you walk through this part of your code?", "What would happen if the input was empty?", "Why did you choose this algorithm over alternative approaches?"
 
 4. COMPLEXITY STAGE:
    - YOUR TASK: IMMEDIATELY ask the candidate to explain the time and space complexity of their solution. DO NOT just announce the stage.
@@ -129,7 +129,7 @@ Previous conversation:
             full_prompt += f"\n\nUser's code solution:\n{code_solution}\n"
             # If we're in followup stage and have code, emphasize asking about the code
             if current_stage == "followup":
-                full_prompt += "\n\nCRITICAL: You are in FOLLOWUP stage. You MUST ask a specific question about the code above. Do NOT say 'Let's proceed to follow-up questions' or 'Let's move to follow-up questions' - ASK THE QUESTION NOW. Reference specific parts of the code in your question."
+                full_prompt += "\n\nCRITICAL: You are in FOLLOWUP stage. You MUST ask a specific question about the code above. Do NOT say 'Let's proceed to follow-up questions' or 'Let's move to follow-up questions' or 'Good work. Let's continue with follow-up questions' - ASK THE QUESTION NOW. Reference specific parts of the code in your question. Example: 'Why did you choose to use a HashMap here?' or 'How does your code handle the edge case of an empty array?' or 'Can you walk me through what happens in this loop?'"
             # If we're in complexity stage and have code, emphasize asking about complexity
             elif current_stage == "complexity":
                 full_prompt += "\n\nCRITICAL: You are in COMPLEXITY STAGE. You MUST ask the candidate to explain the time and space complexity of their solution. Do NOT say 'Let's proceed to complexity analysis' or 'Let's analyze the complexity' - ASK THE QUESTION DIRECTLY. Example: 'Can you explain the time and space complexity of your solution?'"
@@ -137,9 +137,31 @@ Previous conversation:
         # Add explicit instruction to keep response short and not repeat user
         full_prompt += "\n\nIMPORTANT: Respond in 2-3 sentences maximum. Do NOT repeat what the user said. Ask a focused question or give brief feedback only."
         
+        # Special handling for coding stage - no questions should be asked
+        if current_stage == "coding":
+            full_prompt += "\n\nCODING STAGE - CRITICAL: The candidate is currently coding. DO NOT ask any questions. If they're asking for help or clarification, provide brief guidance only. Otherwise, acknowledge briefly and let them continue coding. Do NOT interrupt their coding process with questions."
+        
         # Additional stage-specific instructions (apply even if no code solution yet)
         if current_stage == "followup":
-            full_prompt += "\n\nFOLLOWUP STAGE REMINDER: Ask a specific question about the code. Examples: 'Why did you use X?', 'How does your code handle Y?', 'Can you explain this part?' Do NOT announce the stage - just ask the question. NEVER say 'I understand. Let's continue' without asking an actual question."
+            # Count interviewer messages in followup to track progress
+            followup_interviewer_count = 0
+            if conversation_history:
+                in_followup = False
+                for msg in conversation_history:
+                    # Detect when coding ended (user said they're done or submitted code)
+                    if msg.get('speaker') == 'user' and any(phrase in msg.get('message', '').lower() for phrase in ['complete coding', 'completed', 'done', 'finished coding']):
+                        in_followup = True
+                    if in_followup and msg.get('speaker') == 'interviewer':
+                        followup_interviewer_count += 1
+            
+            if followup_interviewer_count >= 2:
+                # After 2 questions, explicitly transition to complexity
+                full_prompt += "\n\nFOLLOWUP STAGE - TRANSITION: You've asked 2 follow-up questions. Now explicitly transition to complexity analysis. Say something like: 'Great! Now let's analyze the complexity. Can you explain the time and space complexity of your solution?' This will move the interview to the COMPLEXITY stage."
+            elif followup_interviewer_count == 0:
+                # First follow-up question - be very explicit
+                full_prompt += "\n\nFOLLOWUP STAGE - FIRST QUESTION: This is your FIRST response in the follow-up stage. You MUST ask a specific question about their code implementation. Do NOT say 'Let's continue with follow-up questions' or 'Good work. Let's continue' - IMMEDIATELY ask a specific question. Examples: 'Why did you choose to use a HashMap in your solution?', 'How does your code handle the case when the input array is empty?', 'Can you explain the logic in this nested loop?'"
+            else:
+                full_prompt += "\n\nFOLLOWUP STAGE REMINDER: Ask a specific question about the code. Examples: 'Why did you use X?', 'How does your code handle Y?', 'Can you explain this part?' Do NOT announce the stage - just ask the question. NEVER say 'I understand. Let's continue' without asking an actual question."
         elif current_stage == "complexity":
             # Add complexity instructions even if code_solution is not provided yet
             if not code_solution:
@@ -203,10 +225,29 @@ Previous conversation:
                         "next_stage": "coding"
                     }
                 elif current_stage == "coding":
-                    return {
-                        "message": "Good work on the code. Let's move to follow-up questions.",
-                        "next_stage": "followup"
-                    }
+                    # If user just completed coding, ask first follow-up question
+                    if code_solution:
+                        return {
+                            "message": "Good work on the implementation. Looking at your code, why did you choose this particular approach?",
+                            "next_stage": "followup"
+                        }
+                    else:
+                        return {
+                            "message": "Good work on the code. Let's move to follow-up questions.",
+                            "next_stage": "followup"
+                        }
+                elif current_stage == "followup":
+                    # In followup stage, ask a specific question
+                    if code_solution:
+                        return {
+                            "message": "How does your code handle edge cases, such as an empty input?",
+                            "next_stage": "followup"
+                        }
+                    else:
+                        return {
+                            "message": "Can you walk me through your code's logic?",
+                            "next_stage": "followup"
+                        }
                 else:
                     return {
                         "message": "I understand. Let's continue with the next step.",
@@ -234,13 +275,21 @@ Previous conversation:
                     if current_stage == "explanation":
                         ai_message = "I understand your approach. Please proceed to coding."
                     elif current_stage == "coding":
-                        ai_message = "Good work. Let's continue with follow-up questions."
+                        if code_solution:
+                            ai_message = "Good work. Looking at your code, why did you choose this particular data structure?"
+                        else:
+                            ai_message = "Good work. Let's continue with follow-up questions."
+                    elif current_stage == "followup":
+                        if code_solution:
+                            ai_message = "How does your code handle edge cases?"
+                        else:
+                            ai_message = "Can you explain your implementation approach?"
                     else:
                         ai_message = "I understand. Let's continue."
             
             # Determine next stage based on response and current stage
             try:
-                next_stage = self._determine_next_stage(current_stage, ai_message)
+                next_stage = self._determine_next_stage(current_stage, ai_message, conversation_history)
             except TypeError as te:
                 # Catch argument mismatch errors and provide fallback
                 print(f"ERROR: _determine_next_stage argument mismatch: {te}")
@@ -298,46 +347,64 @@ Previous conversation:
                     "next_stage": current_stage
                 }
     
-    def _determine_next_stage(self, current_stage: str, ai_response: str) -> str:
-        """Determine next interview stage based on AI response"""
-        response_lower = ai_response.lower()
-        
-        if current_stage == "explanation":
-            # Check if AI approves moving to coding
-            if any(word in response_lower for word in ["good", "sounds good", "proceed", "code", "implement", "write"]):
+        def _determine_next_stage(self, current_stage: str, ai_response: str, conversation_history: List[Dict[str, str]] = None) -> str:
+            """Determine next interview stage based on AI response"""
+            response_lower = ai_response.lower()
+            
+            if current_stage == "explanation":
+                # Check if AI approves moving to coding
+                if any(word in response_lower for word in ["good", "sounds good", "proceed", "code", "implement", "write"]):
+                    return "coding"
+                return "explanation"
+            
+            elif current_stage == "coding":
+                # After coding, move to followup
+                # Check if user is saying they completed coding
+                if any(phrase in response_lower for phrase in ["completed", "complete coding", "done", "finished"]):
+                    return "followup"
                 return "coding"
-            return "explanation"
-        
-        elif current_stage == "coding":
-            # After coding, move to followup
-            return "followup"
-        
-        elif current_stage == "followup":
-            # Stay in followup stage - only move to complexity when AI explicitly asks about complexity
-            # This ensures the AI actually asks follow-up questions before moving on
-            # Check if AI is now asking about complexity (moving to next stage)
-            if ("complexity" in response_lower or "analyze" in response_lower) and \
-               ("time" in response_lower or "space" in response_lower or "big o" in response_lower):
-                # AI is asking about complexity, so move to that stage
+            
+            elif current_stage == "followup":
+                # Count how many followup exchanges have occurred
+                followup_count = 0
+                if conversation_history:
+                    # Count messages after coding stage started
+                    in_followup = False
+                    for msg in conversation_history:
+                        if msg.get('message', '').lower() in ['complete coding', 'completed coding', 'done coding']:
+                            in_followup = True
+                        if in_followup and msg.get('speaker') == 'interviewer':
+                            followup_count += 1
+                
+                # After 2-3 follow-up questions from interviewer, move to complexity
+                if followup_count >= 2:
+                    # Check if AI is trying to continue or if it's asking about complexity
+                    if any(phrase in response_lower for phrase in ["let's continue", "let's move", "let's proceed", "next", "complexity"]):
+                        return "complexity"
+                
+                # Check if AI is now asking about complexity (explicit transition)
+                if ("complexity" in response_lower or "analyze" in response_lower) and \
+                   ("time" in response_lower or "space" in response_lower or "big o" in response_lower):
+                    return "complexity"
+                
+                # Stay in followup
+                return "followup"
+            
+            elif current_stage == "complexity":
+                # Stay in complexity until AI has asked about both time and space complexity
+                # Only move to optimization if AI explicitly mentions it
+                if any(word in response_lower for word in ["optimization", "optimize", "better approach", "can you improve"]):
+                    return "optimization"
+                # Check if complexity discussion is done (AI confirms understanding)
+                if any(phrase in response_lower for phrase in ["great", "excellent", "correct", "that's right", "perfect"]) and \
+                   ("complexity" in response_lower or "analysis" in response_lower):
+                    return "complete"
                 return "complexity"
-            # Otherwise stay in followup - don't move on generic phrases like "I understand"
-            return "followup"
-        
-        elif current_stage == "complexity":
-            # Stay in complexity until AI has asked about both time and space complexity
-            # Only move to optimization if AI explicitly mentions it
-            if any(word in response_lower for word in ["optimization", "optimize", "better approach", "can you improve"]):
-                return "optimization"
-            # Check if complexity discussion is done (AI confirms understanding)
-            if any(phrase in response_lower for phrase in ["great", "excellent", "correct", "that's right", "perfect"]) and \
-               ("complexity" in response_lower or "analysis" in response_lower):
+            
+            elif current_stage == "optimization":
                 return "complete"
-            return "complexity"
-        
-        elif current_stage == "optimization":
-            return "complete"
-        
-        return current_stage
+            
+            return current_stage
     
     def _get_fallback_stage(self, current_stage: str) -> str:
         """Fallback method to determine next stage if _determine_next_stage fails"""

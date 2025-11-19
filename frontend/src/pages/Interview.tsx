@@ -54,6 +54,7 @@ const Interview = () => {
   const transcriptionServiceRef = useRef<TranscriptionService | null>(null);
   const previousStageRef = useRef<InterviewStage>('explanation');
   const screenRecordingStartedRef = useRef<boolean>(false); // Track if screen recording has been started
+  const welcomeMessageAddedRef = useRef<boolean>(false); // Track if welcome message has been added
 
   // Define screen recording functions before useEffect
   const startScreenRecording = async () => {
@@ -137,12 +138,15 @@ const Interview = () => {
         }
       }, 100);
       
-      // Add welcome message when interview starts
-      addMessage({
-        speaker: 'interviewer',
-        message: 'Welcome! The interview has started. You are now in the Explanation Stage. Please explain your approach to solve the given problem. You can type your explanation in the chat or use the "Start Speaking" button to explain verbally.',
-        timestamp: now,
-      });
+      // Add welcome message when interview starts - only once to avoid React StrictMode duplicate
+      if (!welcomeMessageAddedRef.current) {
+        welcomeMessageAddedRef.current = true;
+        addMessage({
+          speaker: 'interviewer',
+          message: 'Welcome! The interview has started. You are now in the Explanation Stage. Please explain your approach to solve the given problem. You can type your explanation in the chat or use the "Start Speaking" button to explain verbally.',
+          timestamp: now,
+        });
+      }
       
       // Cleanup timer if component unmounts before it fires
       return () => clearTimeout(timer);

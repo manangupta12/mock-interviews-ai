@@ -164,13 +164,22 @@ def chat_with_interviewer(
         code_solution=session.code_solution
     )
     
-    # Save AI response to transcript
-    ai_transcript = InterviewTranscript(
-        session_id=session.id,
-        speaker="interviewer",
-        message=ai_response["message"]
-    )
-    db.add(ai_transcript)
+    # During coding stage, only save AI response if it's meaningful (not just "Continue coding")
+    # This prevents unnecessary interruptions during the coding phase
+    should_save_response = True
+    if session.current_stage == "coding" and ai_response["message"].strip().lower() in [
+        "continue coding", "keep coding", "continue", "please continue"
+    ]:
+        should_save_response = False
+    
+    # Save AI response to transcript (only if meaningful)
+    if should_save_response:
+        ai_transcript = InterviewTranscript(
+            session_id=session.id,
+            speaker="interviewer",
+            message=ai_response["message"]
+        )
+        db.add(ai_transcript)
     
     # Update session stage
     session.current_stage = ai_response["next_stage"]

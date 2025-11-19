@@ -1,0 +1,35 @@
+.code-editor-container {
+  background: #272822;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.code-editor-container.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.code-editor-header {
+  background: #1e1e1e;
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.language-selector {
+  padding: 0.5rem;
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.language-selector:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

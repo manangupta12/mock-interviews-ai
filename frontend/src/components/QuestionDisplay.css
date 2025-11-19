@@ -1,0 +1,122 @@
+.question-display {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Infinite height - no restrictions */
+  overflow: visible;
+  height: auto;
+  min-height: 100%;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.question-title {
+  color: #333;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.difficulty-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.difficulty-badge.easy {
+  background: #d4edda;
+  color: #155724;
+}
+
+.difficulty-badge.medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.difficulty-badge.hard {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.question-description {
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  color: #444;
+}
+
+.question-description p {
+  margin-bottom: 0.5rem;
+}
+
+.question-examples {
+  margin-bottom: 1.5rem;
+}
+
+.question-examples h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.example {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #667eea;
+}
+
+.example-input,
+.example-output {
+  margin-bottom: 0.5rem;
+}
+
+.example-input strong,
+.example-output strong {
+  color: #333;
+}
+
+.example code {
+  background: #e9ecef;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.example-explanation {
+  margin-top: 0.5rem;
+  color: #666;
+  font-style: italic;
+}
+
+.question-constraints {
+  margin-top: 1.5rem;
+}
+
+.question-constraints h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.question-constraints pre {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 5px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #444;
+}
+

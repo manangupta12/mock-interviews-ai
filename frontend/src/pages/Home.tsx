@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import Navbar from '../components/Navbar';
 import './Home.css';
 
 const Home = () => {
@@ -28,19 +29,19 @@ const Home = () => {
     { 
       name: 'Amazon', 
       label: 'Amazon', 
-      logoUrl: 'https://cdn.simpleicons.org/amazon/FF9900',
+      logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
       fallbackIcon: '📦'
     },
     { 
       name: 'Meta', 
       label: 'Meta', 
-      logoUrl: 'https://cdn.simpleicons.org/meta/0081FB',
+      logoUrl: 'https://cdn.simpleicons.org/meta/0866FF',
       fallbackIcon: '👤'
     },
     { 
       name: 'Microsoft', 
       label: 'Microsoft', 
-      logoUrl: 'https://cdn.simpleicons.org/microsoft/00A4EF',
+      logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg',
       fallbackIcon: '🪟'
     },
     { 
@@ -62,10 +63,28 @@ const Home = () => {
       fallbackIcon: '🚗'
     },
     { 
-      name: 'General', 
-      label: 'General', 
-      logoUrl: 'https://cdn.simpleicons.org/briefcase/667eea',
-      fallbackIcon: '💼'
+      name: 'Airbnb', 
+      label: 'Airbnb', 
+      logoUrl: 'https://cdn.simpleicons.org/airbnb/FF5A5F',
+      fallbackIcon: '🏠'
+    },
+    { 
+      name: 'Stripe', 
+      label: 'Stripe', 
+      logoUrl: 'https://cdn.simpleicons.org/stripe/635BFF',
+      fallbackIcon: '💳'
+    },
+    { 
+      name: 'Adobe', 
+      label: 'Adobe', 
+      logoUrl: 'https://cdn.simpleicons.org/adobe/FF0000',
+      fallbackIcon: '🎨'
+    },
+    { 
+      name: 'Salesforce', 
+      label: 'Salesforce', 
+      logoUrl: 'https://cdn.simpleicons.org/salesforce/00A1E0',
+      fallbackIcon: '☁️'
     },
   ];
 
@@ -117,16 +136,14 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      <div className="home-header">
-        <h1>MockInterviews.ai</h1>
-        <button onClick={logout} className="logout-button">
-          Logout
-        </button>
-      </div>
+      <Navbar />
       <div className="home-content">
         <div className="welcome-card">
-          <h2>Welcome to Your Mock Interview</h2>
-          <p>Practice your DSA skills with AI-powered mock interviews</p>
+          <div className="hero-section">
+            <div className="hero-badge">🚀 AI-Powered Interview Prep</div>
+            <h1 className="hero-title">Ace Your Next Tech Interview</h1>
+            <p className="hero-subtitle">Master DSA problems with real-time AI feedback. Practice like you're interviewing at top tech companies.</p>
+          </div>
           
           <div className="company-selector">
             <h3>Select Company</h3>

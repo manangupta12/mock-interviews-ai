@@ -40,7 +40,25 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-header">
-        <h1>MockInterviews.ai</h1>
+        <div className="brand-logo-static">
+          <div className="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="url(#gradient1)"/>
+              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <defs>
+                <linearGradient id="gradient1" x1="2" y1="2" x2="22" y2="12">
+                  <stop offset="0%" stopColor="#667eea"/>
+                  <stop offset="100%" stopColor="#764ba2"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div className="brand-text">
+            <span className="brand-name">MockInterviews</span>
+            <span className="brand-tld">.ai</span>
+          </div>
+        </div>
       </div>
       <div className="login-content">
         <div className="login-card">

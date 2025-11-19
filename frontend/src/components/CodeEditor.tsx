@@ -65,14 +65,18 @@ const CodeEditor = ({ code, language, onChange, onLanguageChange, disabled }: Co
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          background: 'rgba(0, 0, 0, 0.8)',
+          background: 'rgba(0, 0, 0, 0.9)',
           color: 'white',
           padding: '1rem 2rem',
-          borderRadius: '5px',
+          borderRadius: '8px',
           pointerEvents: 'none',
-          zIndex: 10
+          zIndex: 10,
+          fontSize: '1rem',
+          fontWeight: 600,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+          border: '2px solid rgba(255, 193, 7, 0.5)'
         }}>
-          Code editor will be enabled after explanation stage
+          🔒 Code editor is locked
         </div>
       )}
     </div>

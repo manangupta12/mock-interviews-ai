@@ -9,6 +9,7 @@ import QuestionDisplay from '../components/QuestionDisplay';
 import Timer from '../components/Timer';
 import ChatInterface from '../components/ChatInterface';
 import CodeEditor from '../components/CodeEditor';
+import Navbar from '../components/Navbar';
 import './Interview.css';
 
 const Interview = () => {
@@ -176,19 +177,31 @@ const Interview = () => {
     // Listen for visibility changes (primary method - most reliable)
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        return () => {
-          if (transcriptionServiceRef.current) {
-            transcriptionServiceRef.current.stop();
-          }
-          document.removeEventListener('visibilitychange', handleVisibilityChange);
-          // Stop screen recording and webcam on unmount
-          stopScreenRecording();
-          if (videoPreviewHandleRef.current) {
-            videoPreviewHandleRef.current.stopStream();
-          }
-          reset();
-        };
-      }, []);
+    // Add beforeunload handler to warn user when leaving during interview
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (stage !== 'complete' && sessionId) {
+        e.preventDefault();
+        e.returnValue = 'Your interview is still in progress. Are you sure you want to leave? Your progress will be lost.';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (transcriptionServiceRef.current) {
+        transcriptionServiceRef.current.stop();
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // Stop screen recording and webcam on unmount
+      stopScreenRecording();
+      if (videoPreviewHandleRef.current) {
+        videoPreviewHandleRef.current.stopStream();
+      }
+      reset();
+    };
+  }, [stage, sessionId]);
 
   // Play chime sound for new messages
   const playChimeSound = () => {
@@ -475,8 +488,8 @@ const Interview = () => {
 
   // Code editor is always visible but disabled until coding stage
   const canCode = true; // Always show code editor
-  const canEditCode = stage === 'coding' || stage === 'followup'; // Can edit in coding/followup stages
-  const canSubmit = stage === 'coding' || stage === 'followup';
+  const canEditCode = stage === 'coding'; // Can ONLY edit during coding stage
+  const canSubmit = stage === 'coding'; // Can only submit during coding stage
 
   const getStageLabel = (currentStage: InterviewStage) => {
     const stageLabels: Record<InterviewStage, string> = {
@@ -567,24 +580,32 @@ const Interview = () => {
     }
   };
 
+  const handleLogoClick = () => {
+    if (stage !== 'complete' && sessionId) {
+      const confirmed = window.confirm(
+        'Your interview is still in progress. Are you sure you want to leave? Your progress may be lost.'
+      );
+      return confirmed;
+    }
+    return true;
+  };
+
   return (
     <div className="interview-container">
-      <div className="interview-top-bar">
-        <div className="interview-header">
-          <h1>MockInterviews.ai</h1>
-          <div className="header-content">
-            <div className="interview-stage-badge">
-              {getStageLabel(stage)}
-            </div>
-            {stageStartTime && (
-              <div className="status-item">
-                <Timer startTime={stageStartTime} stage={stage} />
-              </div>
-            )}
-            <button onClick={logout} className="logout-button">
-              Logout
-            </button>
+      <div className="navbar-wrapper">
+        <Navbar showLogout={false} onLogoClick={handleLogoClick} />
+        <div className="navbar-overlays">
+          <div className="interview-stage-badge">
+            {getStageLabel(stage)}
           </div>
+          {stageStartTime && (
+            <div className="timer-overlay">
+              <Timer startTime={stageStartTime} stage={stage} />
+            </div>
+          )}
+          <button onClick={logout} className="logout-button-overlay">
+            Logout
+          </button>
         </div>
       </div>
 
@@ -742,7 +763,7 @@ const Interview = () => {
                       language={language}
                       onChange={setCode}
                       onLanguageChange={setLanguage}
-                      disabled={!canEditCode}
+                      disabled={stage !== 'coding'}
                     />
                     <div className="code-actions">
                       <button

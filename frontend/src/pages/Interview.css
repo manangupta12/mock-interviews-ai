@@ -8,50 +8,37 @@
   overflow: hidden;
 }
 
-/* Top bar containing navbar, webcam, and timer */
-.interview-top-bar {
+/* Navbar wrapper with overlays */
+.navbar-wrapper {
+  position: relative;
   flex-shrink: 0;
-  padding: 1.5rem 2rem;
 }
 
-.interview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 1rem 1.5rem;
-  gap: 1rem;
-}
-
-.interview-header h1 {
-  color: white;
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: 600;
-}
-
-.header-content {
+.navbar-overlays {
+  position: absolute;
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 1rem;
+  z-index: 10;
 }
 
 .interview-stage-badge {
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.95);
+  padding: 0.4rem 0.875rem;
+  background: rgba(255, 255, 255, 0.98);
   color: #667eea;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(102, 126, 234, 0.5);
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   animation: blink 2s infinite;
+  backdrop-filter: blur(10px);
 }
 
 @keyframes blink {
@@ -65,21 +52,40 @@
   }
 }
 
-.logout-button {
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 5px;
+.logout-button-overlay {
+  padding: 0.4rem 0.875rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: all 0.3s;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
 }
 
-.logout-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
+.logout-button-overlay:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.timer-overlay {
+  padding: 0.4rem 0.75rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 18px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: center;
 }
 
 .status-item {

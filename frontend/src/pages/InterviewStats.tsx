@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import Navbar from '../components/Navbar';
 import './InterviewStats.css';
 
 interface StageStats {
@@ -128,28 +129,25 @@ const InterviewStats = () => {
 
   return (
     <div className="stats-container">
-      <div className="stats-header">
-        <h1>MockInterviews.ai</h1>
-        <button onClick={logout} className="logout-button">
-          Logout
-        </button>
-      </div>
+      <Navbar />
 
       <div className="stats-content">
-        <div className="stats-card">
-          <h2>Interview Statistics</h2>
-          
-          {sessionData?.question && (
-            <div className="question-info">
-              <h3>Question: {sessionData.question.title}</h3>
-              <p className="difficulty">Difficulty: {sessionData.question.difficulty}</p>
-            </div>
-          )}
+          <div className="stats-card">
+            <h2>Interview Statistics</h2>
+            
+            <div className="stats-top-section">
+              {sessionData?.question && (
+                <div className="question-info">
+                  <h3>Question: {sessionData.question.title}</h3>
+                  <p className="difficulty">Difficulty: {sessionData.question.difficulty}</p>
+                </div>
+              )}
 
-          <div className="total-time">
-            <h3>Total Interview Time</h3>
-            <div className="time-display">{formatTime(totalTime)}</div>
-          </div>
+              <div className="total-time">
+                <h3>Total Interview Time</h3>
+                <div className="time-display">{formatTime(totalTime)}</div>
+              </div>
+            </div>
 
           {/* Test Case Results */}
           {sessionData?.session?.test_results && sessionData.session.test_results.total > 0 && (

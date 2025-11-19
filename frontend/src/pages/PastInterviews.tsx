@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import Navbar from '../components/Navbar';
 import './PastInterviews.css';
 
 interface InterviewSession {
@@ -115,12 +116,7 @@ const PastInterviews = () => {
 
   return (
     <div className="past-interviews-container">
-      <div className="past-interviews-header">
-        <h1>MockInterviews.ai</h1>
-        <button onClick={logout} className="logout-button">
-          Logout
-        </button>
-      </div>
+      <Navbar />
 
       <div className="past-interviews-content">
         <div className="past-interviews-card">

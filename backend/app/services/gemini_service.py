@@ -135,11 +135,11 @@ Previous conversation:
                 full_prompt += "\n\nCRITICAL: You are in COMPLEXITY STAGE. You MUST ask the candidate to explain the time and space complexity of their solution. Do NOT say 'Let's proceed to complexity analysis' or 'Let's analyze the complexity' - ASK THE QUESTION DIRECTLY. Example: 'Can you explain the time and space complexity of your solution?'"
         
         # Add explicit instruction to keep response short and not repeat user
-        full_prompt += "\n\nIMPORTANT: Respond in 1-2 sentences maximum. Do NOT repeat what the user said. Ask a focused question or give brief feedback only."
+        full_prompt += "\n\nIMPORTANT: Respond in 2-3 sentences maximum. Do NOT repeat what the user said. Ask a focused question or give brief feedback only."
         
         # Additional stage-specific instructions (apply even if no code solution yet)
         if current_stage == "followup":
-            full_prompt += "\n\nFOLLOWUP STAGE REMINDER: Ask a specific question about the code. Examples: 'Why did you use X?', 'How does your code handle Y?', 'Can you explain this part?' Do NOT announce the stage - just ask the question."
+            full_prompt += "\n\nFOLLOWUP STAGE REMINDER: Ask a specific question about the code. Examples: 'Why did you use X?', 'How does your code handle Y?', 'Can you explain this part?' Do NOT announce the stage - just ask the question. NEVER say 'I understand. Let's continue' without asking an actual question."
         elif current_stage == "complexity":
             # Add complexity instructions even if code_solution is not provided yet
             if not code_solution:
@@ -154,7 +154,7 @@ Previous conversation:
                     temperature=0.7,
                     top_p=0.8,
                     top_k=40,
-                    max_output_tokens=150,
+                    max_output_tokens=300,  # Increased from 150 to allow full questions
                 )
                 response = self.model.generate_content(
                     full_prompt,

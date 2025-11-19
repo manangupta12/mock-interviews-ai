@@ -57,14 +57,17 @@ const Interview = () => {
 
   // Define screen recording functions before useEffect
   const startScreenRecording = async () => {
-    // Prevent multiple calls
+    // Prevent multiple calls - check and set atomically
     if (screenRecordingStartedRef.current) {
-      console.log('Screen recording already started, skipping...');
+      console.log('Screen recording already started or in progress, skipping...');
       return;
     }
     
+    // Set the flag immediately to prevent race conditions from React StrictMode
+    screenRecordingStartedRef.current = true;
+    
     try {
-      screenRecordingStartedRef.current = true;
+      console.log('Requesting screen capture...');
       // Request screen capture
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
@@ -103,6 +106,8 @@ const Interview = () => {
       });
     } catch (error) {
       console.error('Failed to start screen recording:', error);
+      // Reset flag if screen recording fails so user can try again
+      screenRecordingStartedRef.current = false;
       // Don't block interview if recording fails
     }
   };
@@ -124,8 +129,13 @@ const Interview = () => {
       setStartTime(now);
       setStageStartTime(now); // Initialize stage start time
       
-      // Start screen recording
-      startScreenRecording();
+      // Start screen recording - use setTimeout to avoid React StrictMode double execution
+      // This ensures only one prompt appears even in development mode
+      const timer = setTimeout(() => {
+        if (!screenRecordingStartedRef.current) {
+          startScreenRecording();
+        }
+      }, 100);
       
       // Add welcome message when interview starts
       addMessage({
@@ -133,6 +143,9 @@ const Interview = () => {
         message: 'Welcome! The interview has started. You are now in the Explanation Stage. Please explain your approach to solve the given problem. You can type your explanation in the chat or use the "Start Speaking" button to explain verbally.',
         timestamp: now,
       });
+      
+      // Cleanup timer if component unmounts before it fires
+      return () => clearTimeout(timer);
     } else {
       navigate('/home');
     }

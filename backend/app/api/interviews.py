@@ -295,6 +295,33 @@ def save_statistics(
     return {"message": "Statistics saved successfully", "stage_statistics": merged_stats}
 
 
+@router.post("/complete-session")
+def complete_session(
+    request: dict,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Mark interview session as completed (for early termination)"""
+    session_id = request.get("session_id")
+    session = db.query(InterviewSession).filter(
+        InterviewSession.id == session_id,
+        InterviewSession.user_id == current_user.id
+    ).first()
+    
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Interview session not found"
+        )
+    
+    # Mark as completed if not already
+    if session.status != "completed":
+        session.status = "completed"
+        session.completed_at = datetime.utcnow()
+        db.commit()
+        print(f"Session {session_id} marked as completed (early termination)")
+    
+    return {"message": "Session marked as completed"}
 
 
 @router.get("/sessions")

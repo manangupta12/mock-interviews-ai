@@ -54,6 +54,7 @@ const Interview = () => {
   const videoPreviewHandleRef = useRef<{ stopStream: () => void } | null>(null);
   const transcriptionServiceRef = useRef<TranscriptionService | null>(null);
   const previousStageRef = useRef<InterviewStage>('explanation');
+  const switchDetectedRef = useRef<boolean>(false);
   const screenRecordingStartedRef = useRef<boolean>(false); // Track if screen recording has been started
   const welcomeMessageAddedRef = useRef<boolean>(false); // Track if welcome message has been added
 
@@ -158,26 +159,46 @@ const Interview = () => {
     // Initialize transcription service
     transcriptionServiceRef.current = new TranscriptionService();
 
-    // Detect tab switch/visibility change
-    // Use a ref to track if we've already counted this switch to avoid double counting
-    let switchDetected = false;
-    
+    return () => {
+      if (transcriptionServiceRef.current) {
+        transcriptionServiceRef.current.stop();
+      }
+      // Stop screen recording and webcam on unmount
+      stopScreenRecording();
+      if (videoPreviewHandleRef.current) {
+        videoPreviewHandleRef.current.stopStream();
+      }
+      reset();
+    };
+  }, [stage, sessionId]);
+
+  // Tab switch detection - separate useEffect to ensure it always runs
+  useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden && !switchDetected) {
+      if (document.hidden && !switchDetectedRef.current && stage !== 'complete') {
         // Tab switched or window minimized
-        switchDetected = true;
+        switchDetectedRef.current = true;
+        console.log('Tab switch detected!');
+        
         setTabSwitchCount(prev => prev + 1);
         setTabSwitchWarning(true);
       } else if (!document.hidden) {
         // Tab is visible again, reset the flag
-        switchDetected = false;
+        switchDetectedRef.current = false;
       }
     };
 
-    // Listen for visibility changes (primary method - most reliable)
+    // Listen for visibility changes
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    console.log('Tab switch detection enabled');
 
-    // Add beforeunload handler to warn user when leaving during interview
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [stage]); // Only depend on stage to check if interview is complete
+
+  // Beforeunload warning - separate useEffect
+  useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (stage !== 'complete' && sessionId) {
         e.preventDefault();
@@ -190,16 +211,6 @@ const Interview = () => {
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (transcriptionServiceRef.current) {
-        transcriptionServiceRef.current.stop();
-      }
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      // Stop screen recording and webcam on unmount
-      stopScreenRecording();
-      if (videoPreviewHandleRef.current) {
-        videoPreviewHandleRef.current.stopStream();
-      }
-      reset();
     };
   }, [stage, sessionId]);
 
